@@ -1,0 +1,87 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+
+packages:
+  - docker.io
+  - docker-compose-v2
+  - fail2ban
+  - ufw
+  - curl
+
+users:
+  - name: ${ssh_user}
+    groups: [sudo, docker]
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ${ssh_pub_key}
+
+runcmd:
+  - systemctl enable docker
+  - systemctl start docker
+
+  - sed -i 's/^#\?Port .*/Port ${ssh_port}/' /etc/ssh/sshd_config
+  - sed -i 's/^#\?PermitRootLogin .*/PermitRootLogin no/' /etc/ssh/sshd_config
+  - sed -i 's/^#\?PasswordAuthentication .*/PasswordAuthentication no/' /etc/ssh/sshd_config
+  - sed -i 's/^#\?KbdInteractiveAuthentication .*/KbdInteractiveAuthentication no/' /etc/ssh/sshd_config
+  - sed -i 's/^#\?MaxAuthTries .*/MaxAuthTries 3/' /etc/ssh/sshd_config
+  - systemctl restart sshd
+
+  - |
+    cat > /etc/fail2ban/jail.local << 'JAIL'
+    [sshd]
+    enabled = true
+    port = ${ssh_port}
+    maxretry = 3
+    bantime = 3600
+    findtime = 600
+    JAIL
+  - systemctl enable fail2ban
+  - systemctl restart fail2ban
+
+  - ufw default deny incoming
+  - ufw default allow outgoing
+  - ufw allow ${ssh_port}/tcp
+  - ufw --force enable
+
+  - curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o /tmp/cloudflared.deb
+  - dpkg -i /tmp/cloudflared.deb
+  - rm /tmp/cloudflared.deb
+
+  - cloudflared service install ${tunnel_token}
+  - systemctl enable cloudflared
+  - systemctl start cloudflared
+
+  - mkdir -p /opt/openclaw
+  - chown ${ssh_user}:docker /opt/openclaw
+
+  - |
+    cat > /opt/openclaw/docker-compose.yml << 'COMPOSE'
+    services:
+      qdrant:
+        image: qdrant/qdrant:latest
+        restart: unless-stopped
+        ports:
+          - "127.0.0.1:6333:6333"
+        volumes:
+          - qdrant_data:/qdrant/storage
+
+      n8n:
+        image: n8nio/n8n:latest
+        restart: unless-stopped
+        ports:
+          - "127.0.0.1:5678:5678"
+        volumes:
+          - n8n_data:/home/node/.n8n
+        environment:
+          - N8N_HOST=n8n.ks-infra.dev
+          - N8N_PROTOCOL=https
+          - WEBHOOK_URL=https://n8n.ks-infra.dev/
+
+    volumes:
+      qdrant_data:
+      n8n_data:
+    COMPOSE
+  - chown ${ssh_user}:docker /opt/openclaw/docker-compose.yml
+  - cd /opt/openclaw && docker compose up -d
