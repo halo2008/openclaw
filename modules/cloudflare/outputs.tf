@@ -1,12 +1,12 @@
 output "tunnel_id" {
-  value = cloudflare_tunnel.main.id
+  value = cloudflare_zero_trust_tunnel_cloudflared.main.id
 }
 
 output "tunnel_token" {
-  value     = cloudflare_tunnel.main.tunnel_token
+  value     = cloudflare_zero_trust_tunnel_cloudflared.main.tunnel_token
   sensitive = true
 }
 
 output "tunnel_cname" {
-  value = "${cloudflare_tunnel.main.id}.cfargotunnel.com"
+  value = "${cloudflare_zero_trust_tunnel_cloudflared.main.id}.cfargotunnel.com"
 }

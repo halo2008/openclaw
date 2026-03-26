@@ -1,0 +1,13 @@
+hcloud_token          = "your-hetzner-api-token"
+cloudflare_api_token  = "your-cloudflare-api-token"
+cloudflare_account_id = "your-cloudflare-account-id"
+cloudflare_zone_id    = "your-ks-infra-dev-zone-id"
+gcp_project_id        = "festive-dolphin-483819-i1"
+domain                = "claw.ks-infra.dev"
+environment           = "prod"
+location              = "nbg1"
+server_type           = "cx23"
+ssh_public_key_path   = "~/.ssh/id_ed25519.pub"
+ssh_port              = 2222
+ssh_user              = "deploy"
+allowed_ssh_ips       = ["YOUR.IP.HERE/32"]

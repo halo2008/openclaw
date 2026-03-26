@@ -18,20 +18,20 @@ resource "random_id" "tunnel_secret" {
   byte_length = 32
 }
 
-resource "cloudflare_tunnel" "main" {
+resource "cloudflare_zero_trust_tunnel_cloudflared" "main" {
   account_id = var.account_id
   name       = "${var.project}-${var.environment}"
   secret     = random_id.tunnel_secret.b64_std
 }
 
-resource "cloudflare_tunnel_config" "main" {
+resource "cloudflare_zero_trust_tunnel_cloudflared_config" "main" {
   account_id = var.account_id
-  tunnel_id  = cloudflare_tunnel.main.id
+  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.main.id
 
   config {
     ingress_rule {
       hostname = var.domain
-      service  = "http://localhost:8080"
+      service  = "http://localhost:18789"
     }
 
     dynamic "ingress_rule" {
@@ -51,7 +51,7 @@ resource "cloudflare_tunnel_config" "main" {
 resource "cloudflare_record" "tunnel" {
   zone_id = var.zone_id
   name    = local.domain_parts[0]
-  content = "${cloudflare_tunnel.main.id}.cfargotunnel.com"
+  content = "${cloudflare_zero_trust_tunnel_cloudflared.main.id}.cfargotunnel.com"
   type    = "CNAME"
   proxied = true
 }
@@ -61,7 +61,7 @@ resource "cloudflare_record" "extra" {
 
   zone_id = var.zone_id
   name    = each.key
-  content = "${cloudflare_tunnel.main.id}.cfargotunnel.com"
+  content = "${cloudflare_zero_trust_tunnel_cloudflared.main.id}.cfargotunnel.com"
   type    = "CNAME"
   proxied = true
 }
