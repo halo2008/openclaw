@@ -1,12 +1,26 @@
+<p align="center">
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/openclaw-wordmark-dark.svg">
+        <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/openclaw-wordmark-light.svg" alt="OpenClaw" width="400">
+    </picture>
+</p>
+
+<p align="center">
+  <strong>The Lobster Way. 🦞</strong>
+</p>
+
 # 🚀 OpenClaw Infrastructure
 
-[![Terraform](https://img.shields.io/badge/Terraform-1.5+-623CE4?style=for-the-badge&logo=terraform)](https://www.terraform.io/)
-[![Hetzner](https://img.shields.io/badge/Hetzner-Cloud-ff0000?style=for-the-badge&logo=hetzner)](https://www.hetzner.com/cloud)
-[![GCP](https://img.shields.io/badge/GCP-State-4285F4?style=for-the-badge&logo=google-cloud)](https://cloud.google.com/)
-[![Cloudflare](https://img.shields.io/badge/Cloudflare-Tunnel-F38020?style=for-the-badge&logo=cloudflare)](https://www.cloudflare.com/)
-[![n8n](https://img.shields.io/badge/n8n-Automation-FF6D5B?style=for-the-badge&logo=n8n)](https://n8n.io/)
-[![Qdrant](https://img.shields.io/badge/Qdrant-Knowledge-00D2FF?style=for-the-badge&logo=qdrant)](https://qdrant.tech/)
-[![ClawBot](https://img.shields.io/badge/ClawBot-Framework-000000?style=for-the-badge&logo=anthropic)](https://github.com/halo2008/openclaw)
+<p align="center">
+
+  [![Terraform](https://img.shields.io/badge/Terraform-1.5+-623CE4?style=for-the-badge&logo=terraform)](https://www.terraform.io/)
+  [![Hetzner](https://img.shields.io/badge/Hetzner-Cloud-ff0000?style=for-the-badge&logo=hetzner)](https://www.hetzner.com/cloud)
+  [![GCP](https://img.shields.io/badge/GCP-State-4285F4?style=for-the-badge&logo=google-cloud)](https://cloud.google.com/)
+  [![Cloudflare](https://img.shields.io/badge/Cloudflare-Tunnel-F38020?style=for-the-badge&logo=cloudflare)](https://www.cloudflare.com/)
+  [![n8n](https://img.shields.io/badge/n8n-Automation-FF6D5B?style=for-the-badge&logo=n8n)](https://n8n.io/)
+  [![Qdrant](https://img.shields.io/badge/Qdrant-Knowledge-00D2FF?style=for-the-badge&logo=qdrant)](https://qdrant.tech/)
+  [![ClawBot](https://img.shields.io/badge/ClawBot-Framework-FF4F4F?style=for-the-badge)](https://github.com/halo2008/openclaw)
+</p>
 
 Automated, production-ready infrastructure for **OpenClaw** hosted on Hetzner Cloud. Features secure access via Cloudflare Tunnels and a remote GCP state backend.
 
