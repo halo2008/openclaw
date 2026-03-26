@@ -2,7 +2,7 @@ terraform {
   required_version = ">= 1.5"
 
   backend "gcs" {
-    bucket = "openclaw-tfstate"
+    bucket = "gcp-bucket-name"
     prefix = "openclaw/state"
   }
 

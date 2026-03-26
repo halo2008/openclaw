@@ -54,3 +54,8 @@ variable "ssh_pub_key" {
   description = "SSH public key content"
   type        = string
 }
+
+variable "n8n_host" {
+  description = "n8n public hostname"
+  type        = string
+}

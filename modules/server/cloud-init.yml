@@ -17,6 +17,17 @@ users:
     ssh_authorized_keys:
       - ${ssh_pub_key}
 
+write_files:
+  - path: /etc/ssh/sshd_config.d/99-hardening.conf
+    content: |
+      ${indent(6, sshd_config)}
+  - path: /etc/fail2ban/jail.local
+    content: |
+      ${indent(6, fail2ban_config)}
+  - path: /opt/openclaw/docker-compose.yml
+    content: |
+      ${indent(6, docker_compose)}
+
 runcmd:
   - systemctl enable docker
   - systemctl start docker
@@ -26,28 +37,11 @@ runcmd:
   - ufw allow ${ssh_port}/tcp
   - ufw --force enable
 
-  - rm -f /etc/ssh/sshd_config.d/*.conf
-  - |
-    cat > /etc/ssh/sshd_config.d/99-hardening.conf << 'SSHD'
-    Port ${ssh_port}
-    PermitRootLogin no
-    PasswordAuthentication no
-    KbdInteractiveAuthentication no
-    MaxAuthTries 3
-    SSHD
+  - rm -f /etc/ssh/sshd_config.d/50-cloud-init.conf
   - systemctl disable --now ssh.socket || true
   - systemctl enable ssh.service
   - systemctl restart ssh.service
 
-  - |
-    cat > /etc/fail2ban/jail.local << 'JAIL'
-    [sshd]
-    enabled = true
-    port = ${ssh_port}
-    maxretry = 3
-    bantime = 3600
-    findtime = 600
-    JAIL
   - systemctl enable fail2ban
   - systemctl restart fail2ban
 
@@ -59,56 +53,7 @@ runcmd:
   - systemctl enable cloudflared
   - systemctl start cloudflared
 
-  - mkdir -p /opt/openclaw
   - chown ${ssh_user}:docker /opt/openclaw
-
-  - |
-    cat > /opt/openclaw/docker-compose.yml << 'COMPOSE'
-    services:
-      openclaw:
-        build: https://github.com/openclaw/openclaw.git
-        restart: unless-stopped
-        ports:
-          - "127.0.0.1:18789:18789"
-        volumes:
-          - openclaw_data:/home/node/.openclaw
-        environment:
-          - HOME=/home/node
-          - OPENCLAW_GATEWAY_BIND=lan
-        command: ["node", "dist/index.js", "gateway", "--bind", "lan", "--port", "18789", "--allow-unconfigured"]
-        init: true
-        healthcheck:
-          test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:18789/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
-          interval: 30s
-          timeout: 5s
-          retries: 5
-          start_period: 20s
-
-      qdrant:
-        image: qdrant/qdrant:latest
-        restart: unless-stopped
-        ports:
-          - "127.0.0.1:6333:6333"
-        volumes:
-          - qdrant_data:/qdrant/storage
-
-      n8n:
-        image: n8nio/n8n:latest
-        restart: unless-stopped
-        ports:
-          - "127.0.0.1:5678:5678"
-        volumes:
-          - n8n_data:/home/node/.n8n
-        environment:
-          - N8N_HOST=n8n.ks-infra.dev
-          - N8N_PROTOCOL=https
-          - WEBHOOK_URL=https://n8n.ks-infra.dev/
-
-    volumes:
-      openclaw_data:
-      qdrant_data:
-      n8n_data:
-    COMPOSE
   - chown ${ssh_user}:docker /opt/openclaw/docker-compose.yml
   - touch /opt/openclaw/.env
   - chown ${ssh_user}:docker /opt/openclaw/.env

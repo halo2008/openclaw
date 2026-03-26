@@ -60,4 +60,5 @@ module "server" {
   ssh_port     = var.ssh_port
   ssh_user     = var.ssh_user
   ssh_pub_key  = file(var.ssh_public_key_path)
+  n8n_host     = "n8n.${join(".", slice(split(".", var.domain), 1, length(split(".", var.domain))))}"
 }

@@ -25,10 +25,13 @@ resource "hcloud_server" "main" {
   }
 
   user_data = templatefile("${path.module}/cloud-init.yml", {
-    tunnel_token = var.tunnel_token
-    ssh_port     = var.ssh_port
-    ssh_user     = var.ssh_user
-    ssh_pub_key  = var.ssh_pub_key
+    tunnel_token   = var.tunnel_token
+    ssh_port       = var.ssh_port
+    ssh_user       = var.ssh_user
+    ssh_pub_key    = var.ssh_pub_key
+    docker_compose = templatefile("${path.module}/templates/docker-compose.yml.tpl", { n8n_host = var.n8n_host })
+    sshd_config    = templatefile("${path.module}/templates/sshd-hardening.conf.tpl", { ssh_port = var.ssh_port })
+    fail2ban_config = templatefile("${path.module}/templates/fail2ban.conf.tpl", { ssh_port = var.ssh_port })
   })
 
   depends_on = [var.subnet_id]
