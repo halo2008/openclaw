@@ -38,9 +38,10 @@ module "cloudflare" {
   account_id      = var.cloudflare_account_id
   zone_id         = var.cloudflare_zone_id
   domain          = var.domain
-  extra_hostnames = var.extra_hostnames
-  project         = local.project
-  environment     = var.environment
+  extra_hostnames      = var.extra_hostnames
+  access_allowed_emails = var.access_allowed_emails
+  project              = local.project
+  environment          = var.environment
 }
 
 module "server" {

@@ -23,3 +23,9 @@ variable "extra_hostnames" {
   type    = map(number)
   default = {}
 }
+
+variable "access_allowed_emails" {
+  description = "Emails allowed to access protected applications via Cloudflare Access"
+  type    = list(string)
+  default = []
+}

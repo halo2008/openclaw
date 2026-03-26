@@ -35,6 +35,12 @@ variable "extra_hostnames" {
   }
 }
 
+variable "access_allowed_emails" {
+  description = "Emails allowed to access OpenClaw via Cloudflare Access"
+  type        = list(string)
+  default     = ["ksedkowski@gmail.com"]
+}
+
 variable "environment" {
   description = "Environment name"
   type        = string

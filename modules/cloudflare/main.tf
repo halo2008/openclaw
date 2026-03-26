@@ -56,6 +56,27 @@ resource "cloudflare_record" "tunnel" {
   proxied = true
 }
 
+resource "cloudflare_zero_trust_access_application" "claw" {
+  account_id          = var.account_id
+  name                = "${var.project}-control-ui"
+  domain              = var.domain
+  type                = "self_hosted"
+  session_duration    = "24h"
+  auto_redirect_to_identity = true
+}
+
+resource "cloudflare_zero_trust_access_policy" "claw" {
+  account_id     = var.account_id
+  application_id = cloudflare_zero_trust_access_application.claw.id
+  name           = "Allow owner emails"
+  decision       = "allow"
+  precedence     = 1
+
+  include {
+    email = var.access_allowed_emails
+  }
+}
+
 resource "cloudflare_record" "extra" {
   for_each = var.extra_hostnames
 

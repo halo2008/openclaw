@@ -72,10 +72,17 @@ runcmd:
           - "127.0.0.1:18789:18789"
         volumes:
           - openclaw_data:/home/node/.openclaw
-        env_file:
-          - .env
         environment:
+          - HOME=/home/node
           - OPENCLAW_GATEWAY_BIND=lan
+        command: ["node", "dist/index.js", "gateway", "--bind", "lan", "--port", "18789", "--allow-unconfigured"]
+        init: true
+        healthcheck:
+          test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:18789/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+          interval: 30s
+          timeout: 5s
+          retries: 5
+          start_period: 20s
 
       qdrant:
         image: qdrant/qdrant:latest
@@ -105,4 +112,4 @@ runcmd:
   - chown ${ssh_user}:docker /opt/openclaw/docker-compose.yml
   - touch /opt/openclaw/.env
   - chown ${ssh_user}:docker /opt/openclaw/.env
-  - cd /opt/openclaw && docker compose up -d
+  - cd /opt/openclaw && docker compose --env-file /opt/openclaw/.env up -d
