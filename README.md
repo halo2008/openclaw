@@ -4,6 +4,8 @@
 [![Hetzner](https://img.shields.io/badge/Hetzner-Cloud-ff0000?style=for-the-badge&logo=hetzner)](https://www.hetzner.com/cloud)
 [![GCP](https://img.shields.io/badge/GCP-State-4285F4?style=for-the-badge&logo=google-cloud)](https://cloud.google.com/)
 [![Cloudflare](https://img.shields.io/badge/Cloudflare-Tunnel-F38020?style=for-the-badge&logo=cloudflare)](https://www.cloudflare.com/)
+[![n8n](https://img.shields.io/badge/n8n-Automation-FF6D5B?style=for-the-badge&logo=n8n)](https://n8n.io/)
+[![Qdrant](https://img.shields.io/badge/Qdrant-Knowledge-00D2FF?style=for-the-badge&logo=qdrant)](https://qdrant.tech/)
 
 Automated, production-ready infrastructure for **OpenClaw** hosted on Hetzner Cloud. Features secure access via Cloudflare Tunnels and a remote GCP state backend.
 
@@ -114,6 +116,15 @@ Designed with a **Zero Trust** mindset:
 - `firewall`: Custom SSH and ICMP rules.
 - `cloudflare`: Tunnel and DNS record management.
 - `server`: CX22 instance with `cloud-init` bootstrapping.
+
+---
+
+## 🔌 Ecosystem & Integrations
+
+Enhance your OpenClaw setup with these optional components:
+
+- **n8n**: Dedicated nodes are available for automating OpenClaw workflows.
+- **Qdrant**: Can be integrated as a high-performance vector database for your knowledge base.
 
 ---
 

@@ -1,5 +1,8 @@
 # Instrukcja wdrożenia OpenClaw
 
+[![n8n](https://img.shields.io/badge/n8n-Automation-FF6D5B?style=for-the-badge&logo=n8n)](https://n8n.io/)
+[![Qdrant](https://img.shields.io/badge/Qdrant-Knowledge-00D2FF?style=for-the-badge&logo=qdrant)](https://qdrant.tech/)
+
 ## Co potrzebujesz przed startem
 
 - [ ] Konto Hetzner Cloud + API token
@@ -137,6 +140,16 @@ Użytkownik → claw.ks-infra.dev → Cloudflare CDN → Tunel → cloudflared �
 - Hasła wyłączone — tylko klucz publiczny
 - fail2ban banuje IP po 3 nieudanych próbach na 1h
 - State Terraforma bezpiecznie w GCS z wersjonowaniem
+---
+
+## 🔌 Ekosystem i Integracje
+
+Rozszerz możliwości OpenClaw o dodatkowe komponenty:
+
+- **n8n**: Dostępne są dedykowane paczki n8n do automatyzacji OpenClaw.
+- **Qdrant**: Może zostać wykorzystany jako wydajna baza wiedzy (vector database).
+
+---
 
 ## Przydatne komendy
 
