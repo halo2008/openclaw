@@ -6,6 +6,7 @@
 [![Cloudflare](https://img.shields.io/badge/Cloudflare-Tunnel-F38020?style=for-the-badge&logo=cloudflare)](https://www.cloudflare.com/)
 [![n8n](https://img.shields.io/badge/n8n-Automation-FF6D5B?style=for-the-badge&logo=n8n)](https://n8n.io/)
 [![Qdrant](https://img.shields.io/badge/Qdrant-Knowledge-00D2FF?style=for-the-badge&logo=qdrant)](https://qdrant.tech/)
+[![ClawBot](https://img.shields.io/badge/ClawBot-Framework-000000?style=for-the-badge&logo=anthropic)](https://github.com/halo2008/openclaw)
 
 Automated, production-ready infrastructure for **OpenClaw** hosted on Hetzner Cloud. Features secure access via Cloudflare Tunnels and a remote GCP state backend.
 
@@ -19,8 +20,15 @@ graph TD
     CF -->|Encrypted Tunnel| CT[cloudflared]
     
     subgraph "Hetzner Cloud (Ubuntu 24.04)"
-        CT -->|localhost:8080| App[Docker Container]
-        App --> DB[(Local Data)]
+        direction TB
+        CT -->|localhost:8080| App[OpenClaw Bot]
+        
+        App -.- Tools[Agent Tools & Knowledge]
+        
+        Tools --> KB[(Qdrant DB)]
+        Tools --> n8n[n8n Workflows]
+        Tools --> Search[Web Search]
+        Tools --> DB[(Local Data)]
         
         Security[Firewall / UFW / fail2ban]
     end
@@ -111,11 +119,13 @@ Designed with a **Zero Trust** mindset:
 
 ## 📑 Module Overview
 
-- `gcs-backend`: GCS bucket setup for Terraform.
 - `network`: VPC and internal subnet configuration.
 - `firewall`: Custom SSH and ICMP rules.
 - `cloudflare`: Tunnel and DNS record management.
-- `server`: CX22 instance with `cloud-init` bootstrapping.
+- `server`: CX33 instance with `cloud-init` bootstrapping.
+
+> [!TIP]
+> **Remote state** is strongly recommended for production use. This project uses a GCS bucket with versioning as the Terraform backend — configured in `providers.tf`, not as a separate module. This ensures state is safely stored, versioned, and accessible from CI/CD runners (e.g. when using scheduled agents like Claude Code triggers). You can substitute GCS with any supported [Terraform backend](https://developer.hashicorp.com/terraform/language/backend) (S3, Azure Blob, etc.).
 
 ---
 

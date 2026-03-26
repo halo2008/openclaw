@@ -6,7 +6,7 @@
 ## Co potrzebujesz przed startem
 
 - [ ] Konto Hetzner Cloud + API token
-- [ ] Konto Cloudflare z domeną `ks-infra.dev`
+- [ ] Konto Cloudflare z zarządzaną domeną
 - [ ] Terraform >= 1.5 zainstalowany
 - [ ] gcloud CLI zalogowany (`gcloud auth login`)
 - [ ] Klucz SSH w `~/.ssh/id_ed25519`
@@ -25,8 +25,9 @@
 
 1. Zaloguj się na https://dash.cloudflare.com
 2. **Account ID** — widoczny w prawym panelu na stronie głównej
-3. Kliknij domenę `ks-infra.dev`
+3. Kliknij swoją domenę
 4. **Zone ID** — prawy panel, sekcja "API"
+
 
 ### API Token
 
@@ -40,7 +41,7 @@
 | Account > Cloudflare Tunnel | Edit |
 | Zone > Zone | Read |
 
-4. Ogranicz do strefy `ks-infra.dev`
+4. Ogranicz do swojej strefy DNS
 5. Skopiuj token
 
 ## Krok 3 — Bucket na state Terraforma
@@ -51,6 +52,8 @@ Jednorazowo — tworzysz GCS bucket na zdalny state:
 gsutil mb -p your-project-id -l EU gs://openclaw-tfstate
 gsutil versioning set on gs://openclaw-tfstate
 ```
+
+> **Dlaczego zdalny state?** Trzymanie `terraform.tfstate` lokalnie jest ryzykowne — jeden `rm` i tracisz mapowanie infrastruktury. GCS z wersjonowaniem daje backup, historię zmian i dostęp z wielu maszyn (np. CI/CD, Claude Code triggers). Zaktualizuj nazwę bucketu w `providers.tf` → `backend "gcs"` po utworzeniu.
 
 ## Krok 4 — Konfiguracja zmiennych
 
@@ -66,11 +69,12 @@ hcloud_token          = "token-z-hetzner"
 cloudflare_api_token  = "token-z-cloudflare"
 cloudflare_account_id = "account-id-z-dashboardu"
 cloudflare_zone_id    = "zone-id-z-dashboardu"
+access_allowed_emails = ["your-email@example.com"]
 gcp_project_id        = "your-project-id"
-domain                = "claw.ks-infra.dev"
+domain                = "claw.your-domain.com"
 environment           = "prod"
 location              = "nbg1"
-server_type           = "cx22"
+server_type           = "cx33"
 ssh_public_key_path   = "~/.ssh/id_ed25519.pub"
 ssh_port              = 2222
 ssh_user              = "deploy"
@@ -97,8 +101,9 @@ Terraform stworzy:
 - SSH na porcie 2222 (zamiast domyślnego 22)
 - VPC + subnet
 - Firewall (tylko port 2222 + ICMP)
-- Cloudflare Tunnel + DNS `claw.ks-infra.dev`
-- GCS bucket na state
+- Cloudflare Tunnel + DNS record dla Twojej domeny
+
+> **Uwaga:** GCS bucket na state tworzysz ręcznie w kroku 3 — Terraform go nie provisionuje, tylko używa jako backend.
 
 ## Krok 6 — Weryfikacja
 
@@ -113,7 +118,7 @@ sudo systemctl status cloudflared
 docker ps
 
 # Sprawdź tunel z przeglądarki
-curl https://claw.ks-infra.dev
+curl https://claw.your-domain.com
 ```
 
 > **Uwaga:** Root login jest wyłączony. Łączysz się zawsze jako `deploy`.
@@ -131,7 +136,7 @@ curl https://claw.ks-infra.dev
 ## Jak to działa
 
 ```
-Użytkownik → claw.ks-infra.dev → Cloudflare CDN → Tunel → cloudflared → localhost:8080
+Użytkownik → claw.your-domain.com → Cloudflare CDN → Tunel → cloudflared → OpenClaw Bot → [Tools / Knowledge / n8n]
 ```
 
 - Serwer nie ma otwartych portów 80/443 — cały ruch HTTP idzie przez tunel

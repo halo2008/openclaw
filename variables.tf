@@ -16,14 +16,14 @@ variable "cloudflare_account_id" {
 }
 
 variable "cloudflare_zone_id" {
-  description = "Cloudflare zone ID for ks-infra.dev"
+  description = "Cloudflare zone ID for your domain"
   type        = string
 }
 
 variable "domain" {
   description = "Domain for the main service"
   type        = string
-  default     = "claw.ks-infra.dev"
+  default     = "claw.example.com"
 }
 
 variable "extra_hostnames" {
@@ -38,7 +38,7 @@ variable "extra_hostnames" {
 variable "access_allowed_emails" {
   description = "Emails allowed to access OpenClaw via Cloudflare Access"
   type        = list(string)
-  default     = ["ksedkowski@gmail.com"]
+  default     = ["your-email@example.com"]
 }
 
 variable "environment" {
