@@ -45,7 +45,7 @@
 Jednorazowo — tworzysz GCS bucket na zdalny state:
 
 ```bash
-gsutil mb -p festive-dolphin-483819-i1 -l EU gs://openclaw-tfstate
+gsutil mb -p your-project-id -l EU gs://openclaw-tfstate
 gsutil versioning set on gs://openclaw-tfstate
 ```
 
@@ -63,7 +63,7 @@ hcloud_token          = "token-z-hetzner"
 cloudflare_api_token  = "token-z-cloudflare"
 cloudflare_account_id = "account-id-z-dashboardu"
 cloudflare_zone_id    = "zone-id-z-dashboardu"
-gcp_project_id        = "festive-dolphin-483819-i1"
+gcp_project_id        = "your-project-id"
 domain                = "claw.ks-infra.dev"
 environment           = "prod"
 location              = "nbg1"
@@ -89,7 +89,7 @@ terraform apply       # potwierdź "yes"
 ```
 
 Terraform stworzy:
-- Serwer CX22 na Hetznerze (Ubuntu 24.04)
+- Serwer CX33 na Hetznerze (Ubuntu 24.04)
 - Użytkownik `deploy` (bez root SSH)
 - SSH na porcie 2222 (zamiast domyślnego 22)
 - VPC + subnet
@@ -120,10 +120,10 @@ curl https://claw.ks-infra.dev
 
 | Zasób | Koszt miesięczny |
 |-------|-----------------|
-| Hetzner CX22 (2 vCPU, 4 GB RAM) | ~€4.35 |
+| Hetzner CX33 (4 vCPU, 8 GB RAM) | ~€10.35 |
 | Cloudflare Tunnel | darmowy |
 | GCS bucket (state) | ~$0 |
-| **Razem** | **~€4.35/mies** |
+| **Razem** | **~€10.35/mies** |
 
 ## Jak to działa
 

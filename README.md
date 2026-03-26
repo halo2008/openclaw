@@ -1,162 +1,132 @@
-# OpenClaw Infrastructure
+# 🚀 OpenClaw Infrastructure
 
-Terraform-managed infrastructure for OpenClaw on Hetzner Cloud with Cloudflare Tunnel and GCP state backend.
+[![Terraform](https://img.shields.io/badge/Terraform-1.5+-623CE4?style=for-the-badge&logo=terraform)](https://www.terraform.io/)
+[![Hetzner](https://img.shields.io/badge/Hetzner-Cloud-ff0000?style=for-the-badge&logo=hetzner)](https://www.hetzner.com/cloud)
+[![GCP](https://img.shields.io/badge/GCP-State-4285F4?style=for-the-badge&logo=google-cloud)](https://cloud.google.com/)
+[![Cloudflare](https://img.shields.io/badge/Cloudflare-Tunnel-F38020?style=for-the-badge&logo=cloudflare)](https://www.cloudflare.com/)
 
-## Architecture
+Automated, production-ready infrastructure for **OpenClaw** hosted on Hetzner Cloud. Features secure access via Cloudflare Tunnels and a remote GCP state backend.
 
+---
+
+## 🏗️ Architecture
+
+```mermaid
+graph TD
+    User((User)) -->|HTTPS| CF[Cloudflare CDN]
+    CF -->|Encrypted Tunnel| CT[cloudflared]
+    
+    subgraph "Hetzner Cloud (Ubuntu 24.04)"
+        CT -->|localhost:8080| App[Docker Container]
+        App --> DB[(Local Data)]
+        
+        Security[Firewall / UFW / fail2ban]
+    end
+    
+    Terraform[Terraform CLI] -->|Remote State| GCS[(GCP Bucket)]
+    Terraform -->|Manage| Hetzner
 ```
-                    ┌──────────────────────────────┐
-                    │        Cloudflare CDN         │
-                    │   claw.ks-infra.dev (CNAME)   │
-                    └──────────┬───────────────────┘
-                               │ Tunnel (encrypted)
-                               ▼
-┌─────────────────────────────────────────────────────────┐
-│  Hetzner CX22 — Ubuntu 24.04                           │
-│  ┌─────────────┐  ┌──────────────┐  ┌───────────────┐  │
-│  │ cloudflared │──│ Docker       │  │ fail2ban      │  │
-│  │ (systemd)   │  │ :8080        │  │ UFW           │  │
-│  └─────────────┘  └──────────────┘  └───────────────┘  │
-│                                                         │
-│  User: deploy (no root SSH)    SSH: port 2222 only     │
-│  VPC: 10.0.1.0/24             Firewall: SSH + ICMP     │
-└─────────────────────────────────────────────────────────┘
 
-State: GCS bucket (openclaw-tfstate) — versioned, EU region
-```
+> [!NOTE]
+> All incoming web traffic is routed through **Cloudflare Tunnel**. The server has NO public HTTP/S ports open to the internet.
 
-## Modules
+---
 
-| Module | Description |
-|--------|-------------|
-| `gcs-backend` | GCS bucket for Terraform remote state with versioning |
-| `network` | Hetzner VPC (`10.0.0.0/16`) and cloud subnet |
-| `firewall` | Hetzner firewall — custom SSH port and ICMP only |
-| `cloudflare` | Cloudflare Tunnel + CNAME DNS record for `claw.ks-infra.dev` |
-| `server` | Hetzner CX22 with cloud-init provisioning |
+## 📦 Infrastructure Stack
 
-## Cloud-init provisioning
+| Component | Description |
+|-----------|-------------|
+| **Compute** | Hetzner CX33 (4 vCPU, 8 GB RAM) |
+| **Networking** | Private VPC (`10.0.0.0/16`) with internal subnets |
+| **Security** | SSH on port 2222, Fail2Ban, root access disabled |
+| **Connectivity** | Cloudflare Tunnel (no public ingress) |
+| **State** | GCS bucket with versioning for Terraform state |
 
-The server is bootstrapped on first boot with:
+---
 
-- **Docker** + docker-compose v2
-- **cloudflared** — Cloudflare Tunnel daemon (systemd service)
-- **fail2ban** — brute-force protection on custom SSH port
-- **UFW** — firewall allowing only custom SSH port
-- **Non-root user** (`deploy`) with sudo and Docker access
-- **SSH hardened** — root login disabled, password auth disabled, custom port
-- `/opt/openclaw` — application directory
+## 🛠️ Prerequisites
 
-## Prerequisites
+Before you begin, ensure you have:
 
-- [Terraform](https://developer.hashicorp.com/terraform/install) >= 1.5
-- [gcloud CLI](https://cloud.google.com/sdk/docs/install) — authenticated
-- Hetzner Cloud account + API token
-- Cloudflare account with `ks-infra.dev` zone
-- SSH key pair at `~/.ssh/id_ed25519`
+- [ ] **Terraform** >= 1.5 installed
+- [ ] **gcloud CLI** authenticated (`gcloud auth login`)
+- [ ] **Hetzner Cloud** account + API token
+- [ ] **Cloudflare** account with DNS zone managed
+- [ ] **SSH Key** available at `~/.ssh/id_ed25519`
 
-### Cloudflare API token permissions
+---
 
-Create a custom API token with:
+## 🚀 Getting Started
 
-| Permission | Access |
-|-----------|--------|
-| Zone > DNS | Edit |
-| Account > Cloudflare Tunnel | Edit |
-| Zone > Zone | Read |
-
-### Required IDs from Cloudflare
-
-1. **Account ID** — Dashboard → right sidebar
-2. **Zone ID** — Dashboard → `ks-infra.dev` → right sidebar under "API"
-
-## Getting started
-
-### 1. Create the GCS state bucket
-
+### 1️⃣ Initialize remote state
+Create a GCS bucket to store your infrastructure state securely:
 ```bash
-gsutil mb -p festive-dolphin-483819-i1 -l EU gs://openclaw-tfstate
+gsutil mb -p your-project-id -l EU gs://openclaw-tfstate
 gsutil versioning set on gs://openclaw-tfstate
 ```
 
-### 2. Configure variables
-
+### 2️⃣ Configure environment
+Clone the example configuration and fill in your details:
 ```bash
 cp terraform.tfvars.example terraform.tfvars
+# Open terraform.tfvars and provide your keys/IDs
 ```
 
-Edit `terraform.tfvars`:
-
-```hcl
-hcloud_token          = "hetzner-api-token"
-cloudflare_api_token  = "cloudflare-api-token"
-cloudflare_account_id = "account-id-from-dashboard"
-cloudflare_zone_id    = "zone-id-from-dashboard"
-gcp_project_id        = "festive-dolphin-483819-i1"
-domain                = "claw.ks-infra.dev"
-environment           = "prod"
-location              = "nbg1"
-server_type           = "cx22"
-ssh_public_key_path   = "~/.ssh/id_ed25519.pub"
-ssh_port              = 2222
-ssh_user              = "deploy"
-allowed_ssh_ips       = ["YOUR.PUBLIC.IP/32"]
-```
-
-> Get your public IP: `curl -s ifconfig.me`
-
-### 3. Deploy
-
+### 3️⃣ Deploy infrastructure
 ```bash
 terraform init
 terraform plan
 terraform apply
 ```
 
-### 4. Verify
+---
+
+## 🛡️ Security Model
+
+Designed with a **Zero Trust** mindset:
+
+- 🔒 **Zero Public Ingress**: No ports 80/443 exposed. All web traffic flows through the tunnel.
+- 🔑 **Hardened SSH**:
+  - Custom port `2222` to avoid scanners.
+  - Root login **disabled**.
+  - Password authentication **disabled** (SSH key only).
+  - Restricted to whitelisted IPs via firewall.
+- 🛡️ **Active Protection**: `fail2ban` automatically drops IPs after multiple failed attempts.
+- 📁 **Secure State**: Infra state is versioned and encrypted in GCS.
+
+---
+
+## 💰 Cost Breakdown (Monthly)
+
+| Resource | Cost (Est.) |
+|----------|-------------|
+| Hetzner CX33 | **~€10.35** |
+| Cloudflare Tunnel | **Free** |
+| GCS State Storage | **Minimal** |
+| **Total** | **~€10.35 / mo** |
+
+---
+
+## 📑 Module Overview
+
+- `gcs-backend`: GCS bucket setup for Terraform.
+- `network`: VPC and internal subnet configuration.
+- `firewall`: Custom SSH and ICMP rules.
+- `cloudflare`: Tunnel and DNS record management.
+- `server`: CX22 instance with `cloud-init` bootstrapping.
+
+---
+
+## 🚦 Verification Commands
 
 ```bash
-# SSH into the server (custom port, non-root user)
+# SSH Access (Non-root, port 2222)
 ssh -p 2222 deploy@$(terraform output -raw server_ipv4)
 
-# Check cloudflared status
+# Service Health
 sudo systemctl status cloudflared
-
-# Check Docker
 docker ps
 
-# Test the tunnel
-curl https://claw.ks-infra.dev
+# External Health Check
+curl -I https://your-domain.com
 ```
-
-## Outputs
-
-| Output | Description |
-|--------|-------------|
-| `server_ipv4` | Public IPv4 address (SSH access) |
-| `server_ipv6` | Public IPv6 address |
-| `server_private_ip` | Private IP within VPC |
-| `app_url` | `https://claw.ks-infra.dev` |
-| `tunnel_id` | Cloudflare Tunnel ID |
-| `state_bucket` | GCS bucket name |
-
-## Security model
-
-- **No public HTTP/S ports** — all web traffic routed through Cloudflare Tunnel
-- **No root SSH** — dedicated `deploy` user with key-only auth
-- **Custom SSH port** (2222) — avoids automated scanners targeting port 22
-- **Password authentication disabled** — key-only access
-- **SSH restricted** to whitelisted IPs via Hetzner firewall + UFW
-- **fail2ban** — bans IPs after 3 failed attempts (1h ban)
-- **Cloudflare proxy** — hides server IP, provides DDoS protection and WAF
-- **State encrypted** at rest in GCS with versioning (5 versions retained)
-
-## Cost estimate
-
-| Resource | Monthly cost |
-|----------|-------------|
-| Hetzner CX22 (2 vCPU, 4 GB) | ~€4.35 |
-| Hetzner IPv4 | included |
-| Cloudflare Tunnel | free |
-| GCS state bucket | ~$0 (minimal storage) |
-| **Total** | **~€4.35/mo** |

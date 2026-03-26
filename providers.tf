@@ -2,7 +2,7 @@ terraform {
   required_version = ">= 1.5"
 
   backend "gcs" {
-    bucket = "festive-dolphin-483819-i1-tfstate"
+    bucket = "openclaw-tfstate"
     prefix = "openclaw/state"
   }
 
