@@ -66,5 +66,4 @@ module "server" {
   ssh_pub_key    = file(var.ssh_public_key_path)
   n8n_host       = "n8n.${join(".", slice(split(".", var.domain), 1, length(split(".", var.domain))))}"
   enable_kokoro  = var.enable_kokoro
-  enable_piper   = var.enable_piper
 }

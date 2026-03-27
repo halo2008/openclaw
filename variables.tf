@@ -47,12 +47,6 @@ variable "enable_kokoro" {
   default     = true
 }
 
-variable "enable_piper" {
-  description = "Enable Piper TTS service (Polish)"
-  type        = bool
-  default     = true
-}
-
 variable "environment" {
   description = "Environment name"
   type        = string

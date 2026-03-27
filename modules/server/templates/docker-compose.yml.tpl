@@ -49,6 +49,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
 %{ endif }
+
 %{ if enable_piper }
   piper:
     image: lscr.io/linuxserver/piper:latest
@@ -58,12 +59,10 @@ services:
     volumes:
       - piper_data:/config
     environment:
-      - PIPER_VOICE=pl_PL-gosia-medium
-      - PIPER_LENGTH=1.0
-      - PIPER_NOISE=0.667
-      - PIPER_NOISEW=0.333
-      - PIPER_SPEAKER=0
-      - PIPER_PROCS=1
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Warsaw
+      - PIPER_VOICE=pl_PL-darkman-medium
 %{ endif }
 
 volumes:
