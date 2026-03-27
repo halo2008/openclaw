@@ -38,7 +38,41 @@ services:
       - N8N_PROTOCOL=https
       - WEBHOOK_URL=https://${n8n_host}/
 
+%{ if enable_kokoro }
+  kokoro:
+    image: ghcr.io/remsky/kokoro-fastapi-cpu:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8880:8880"
+    volumes:
+      - kokoro_data:/app/api/src/voices
+    environment:
+      - PYTHONUNBUFFERED=1
+%{ endif }
+%{ if enable_piper }
+  piper:
+    image: lscr.io/linuxserver/piper:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:10200:10200"
+    volumes:
+      - piper_data:/config
+    environment:
+      - PIPER_VOICE=pl_PL-gosia-medium
+      - PIPER_LENGTH=1.0
+      - PIPER_NOISE=0.667
+      - PIPER_NOISEW=0.333
+      - PIPER_SPEAKER=0
+      - PIPER_PROCS=1
+%{ endif }
+
 volumes:
   openclaw_data:
   qdrant_data:
   n8n_data:
+%{ if enable_kokoro }
+  kokoro_data:
+%{ endif }
+%{ if enable_piper }
+  piper_data:
+%{ endif }

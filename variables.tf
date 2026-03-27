@@ -41,6 +41,18 @@ variable "access_allowed_emails" {
   default     = ["your-email@example.com"]
 }
 
+variable "enable_kokoro" {
+  description = "Enable Kokoro TTS service (English)"
+  type        = bool
+  default     = true
+}
+
+variable "enable_piper" {
+  description = "Enable Piper TTS service (Polish)"
+  type        = bool
+  default     = true
+}
+
 variable "environment" {
   description = "Environment name"
   type        = string

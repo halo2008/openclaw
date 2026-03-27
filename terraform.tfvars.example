@@ -11,3 +11,5 @@ ssh_public_key_path   = "~/.ssh/id_ed25519.pub"
 ssh_port              = 2222
 ssh_user              = "deploy"
 allowed_ssh_ips       = ["YOUR.IP.HERE/32"]
+enable_kokoro         = true
+enable_piper          = true

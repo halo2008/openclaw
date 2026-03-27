@@ -59,3 +59,15 @@ variable "n8n_host" {
   description = "n8n public hostname"
   type        = string
 }
+
+variable "enable_kokoro" {
+  description = "Enable Kokoro TTS service (English)"
+  type        = bool
+  default     = true
+}
+
+variable "enable_piper" {
+  description = "Enable Piper TTS service (Polish)"
+  type        = bool
+  default     = true
+}

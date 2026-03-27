@@ -29,7 +29,11 @@ resource "hcloud_server" "main" {
     ssh_port       = var.ssh_port
     ssh_user       = var.ssh_user
     ssh_pub_key    = var.ssh_pub_key
-    docker_compose = templatefile("${path.module}/templates/docker-compose.yml.tpl", { n8n_host = var.n8n_host })
+    docker_compose = templatefile("${path.module}/templates/docker-compose.yml.tpl", {
+      n8n_host       = var.n8n_host
+      enable_kokoro  = var.enable_kokoro
+      enable_piper   = var.enable_piper
+    })
     sshd_config    = templatefile("${path.module}/templates/sshd-hardening.conf.tpl", { ssh_port = var.ssh_port })
     fail2ban_config = templatefile("${path.module}/templates/fail2ban.conf.tpl", { ssh_port = var.ssh_port })
   })
