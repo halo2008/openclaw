@@ -11,6 +11,8 @@
 
 # 🚀 OpenClaw Infrastructure
 
+> 🌐 **[Po polsku? Przeczytaj instrukcję (INSTRUKCJA.md)](file:///home/konrad-s-dkowski/code/openclaw/INSTRUKCJA.md)**
+
 <p align="center">
 
   [![Terraform](https://img.shields.io/badge/Terraform-1.5+-623CE4?style=for-the-badge&logo=terraform)](https://www.terraform.io/)
@@ -110,6 +112,7 @@ terraform apply
 Designed with a **Zero Trust** mindset:
 
 - 🔒 **Zero Public Ingress**: No ports 80/443 exposed. All web traffic flows through the tunnel.
+- 🛂 **Cloudflare Access**: The OpenClaw UI is protected by **Zero Trust Access policies**, requiring email-based authentication (OTP) before reaching the application.
 - 🔑 **Hardened SSH**:
   - Custom port `2222` to avoid scanners.
   - Root login **disabled**.
