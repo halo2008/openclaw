@@ -65,5 +65,14 @@ module "server" {
   ssh_user       = var.ssh_user
   ssh_pub_key    = file(var.ssh_public_key_path)
   n8n_host       = "n8n.${join(".", slice(split(".", var.domain), 1, length(split(".", var.domain))))}"
-  enable_kokoro  = var.enable_kokoro
+  enable_kokoro     = var.enable_kokoro
+  openclaw_version  = var.openclaw_version
+  qdrant_version    = var.qdrant_version
+  n8n_version       = var.n8n_version
+  kokoro_version    = var.kokoro_version
+  piper_version     = var.piper_version
+  deepseek_api_key  = var.deepseek_api_key
+  google_api_key    = var.google_api_key
+  default_model     = var.default_model
+  domain            = var.domain
 }

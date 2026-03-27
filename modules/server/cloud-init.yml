@@ -27,6 +27,9 @@ write_files:
   - path: /opt/openclaw/docker-compose.yml
     content: |
       ${indent(6, docker_compose)}
+  - path: /opt/openclaw/openclaw.json
+    content: |
+      ${indent(6, openclaw_config)}
 
 runcmd:
   - systemctl enable docker
@@ -53,8 +56,15 @@ runcmd:
   - systemctl enable cloudflared
   - systemctl start cloudflared
 
-  - chown ${ssh_user}:docker /opt/openclaw
-  - chown ${ssh_user}:docker /opt/openclaw/docker-compose.yml
+  - chown -R ${ssh_user}:docker /opt/openclaw
   - touch /opt/openclaw/.env
-  - chown ${ssh_user}:docker /opt/openclaw/.env
   - cd /opt/openclaw && docker compose --env-file /opt/openclaw/.env up -d
+  - |
+    # Wait for OpenClaw to create its data directory, then inject config
+    sleep 15
+    OPENCLAW_DATA=$(docker volume inspect openclaw_openclaw_data --format '{{.Mountpoint}}')
+    if [ -n "$OPENCLAW_DATA" ] && [ ! -f "$OPENCLAW_DATA/openclaw.json" ]; then
+      cp /opt/openclaw/openclaw.json "$OPENCLAW_DATA/openclaw.json"
+      chown 1000:1000 "$OPENCLAW_DATA/openclaw.json"
+      cd /opt/openclaw && docker compose restart openclaw
+    fi

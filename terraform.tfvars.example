@@ -12,3 +12,6 @@ ssh_port              = 2222
 ssh_user              = "deploy"
 allowed_ssh_ips       = ["YOUR.IP.HERE/32"]
 enable_kokoro         = true
+deepseek_api_key      = "sk-your-deepseek-api-key"
+google_api_key        = "your-google-gemini-api-key"
+default_model         = "google/gemini-3.1-flash-lite-preview"

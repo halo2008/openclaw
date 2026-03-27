@@ -1,6 +1,6 @@
 services:
   openclaw:
-    build: https://github.com/openclaw/openclaw.git
+    build: https://github.com/openclaw/openclaw.git#${openclaw_version}
     restart: unless-stopped
     ports:
       - "127.0.0.1:18789:18789"
@@ -19,15 +19,21 @@ services:
       start_period: 20s
 
   qdrant:
-    image: qdrant/qdrant:latest
+    image: qdrant/qdrant:${qdrant_version}
     restart: unless-stopped
     ports:
       - "127.0.0.1:6333:6333"
     volumes:
       - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:6333/readyz"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   n8n:
-    image: n8nio/n8n:latest
+    image: n8nio/n8n:${n8n_version}
     restart: unless-stopped
     ports:
       - "127.0.0.1:5678:5678"
@@ -37,10 +43,16 @@ services:
       - N8N_HOST=${n8n_host}
       - N8N_PROTOCOL=https
       - WEBHOOK_URL=https://${n8n_host}/
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5678/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
 %{ if enable_kokoro }
   kokoro:
-    image: ghcr.io/remsky/kokoro-fastapi-cpu:latest
+    image: ghcr.io/remsky/kokoro-fastapi-cpu:${kokoro_version}
     restart: unless-stopped
     ports:
       - "127.0.0.1:8880:8880"
@@ -52,7 +64,7 @@ services:
 
 %{ if enable_piper }
   piper:
-    image: lscr.io/linuxserver/piper:latest
+    image: lscr.io/linuxserver/piper:${piper_version}
     restart: unless-stopped
     ports:
       - "127.0.0.1:10200:10200"

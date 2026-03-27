@@ -72,3 +72,58 @@ variable "enable_piper" {
   default     = true
 }
 
+variable "openclaw_version" {
+  description = "Git ref (tag/branch/commit) for OpenClaw build"
+  type        = string
+  default     = "main"
+}
+
+variable "qdrant_version" {
+  description = "Qdrant Docker image tag"
+  type        = string
+  default     = "v1.13.6"
+}
+
+variable "n8n_version" {
+  description = "n8n Docker image tag"
+  type        = string
+  default     = "1.88.0"
+}
+
+variable "kokoro_version" {
+  description = "Kokoro FastAPI Docker image tag"
+  type        = string
+  default     = "v0.4.3"
+}
+
+variable "piper_version" {
+  description = "Piper Docker image tag"
+  type        = string
+  default     = "latest"
+}
+
+variable "deepseek_api_key" {
+  description = "DeepSeek API key"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "default_model" {
+  description = "Default LLM model for the agent"
+  type        = string
+  default     = "deepseek/deepseek-chat"
+}
+
+variable "google_api_key" {
+  description = "Google Gemini API key"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "domain" {
+  description = "Main domain for the service"
+  type        = string
+}
+
