@@ -139,6 +139,44 @@ variable "default_model" {
   default     = "google/gemini-3.1-flash-lite-preview"
 }
 
+variable "enable_fcm" {
+  description = "Enable FCM push notification service"
+  type        = bool
+  default     = false
+}
+
+variable "firebase_sa_json" {
+  description = "Firebase service account JSON (base64 encoded)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "gateway_token" {
+  description = "OpenClaw gateway auth token (auto-generated if empty)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "enable_cron" {
+  description = "Enable OpenClaw cron scheduler for automated tasks"
+  type        = bool
+  default     = true
+}
+
+variable "cron_jobs" {
+  description = "Pre-configured cron jobs (injected on first deploy)"
+  type = list(object({
+    id             = string
+    name           = string
+    schedule_expr  = string
+    schedule_tz    = optional(string, "Europe/Warsaw")
+    message        = string
+  }))
+  default = []
+}
+
 variable "vpc_ip_range" {
   description = "IP range for VPC network"
   type        = string

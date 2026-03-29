@@ -1,5 +1,11 @@
+resource "random_password" "gateway_token" {
+  length  = 32
+  special = false
+}
+
 locals {
   project     = "openclaw"
+  gateway_token = var.gateway_token != "" ? var.gateway_token : random_password.gateway_token.result
   labels = {
     project     = local.project
     environment = var.environment
@@ -75,4 +81,8 @@ module "server" {
   google_api_key    = var.google_api_key
   default_model     = var.default_model
   domain            = var.domain
+  enable_fcm        = var.enable_fcm
+  gateway_token     = local.gateway_token
+  enable_cron       = var.enable_cron
+  cron_jobs         = var.cron_jobs
 }

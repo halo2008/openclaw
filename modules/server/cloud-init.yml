@@ -30,6 +30,11 @@ write_files:
   - path: /opt/openclaw/openclaw.json
     content: |
       ${indent(6, openclaw_config)}
+%{ if cron_jobs_config != "" ~}
+  - path: /opt/openclaw/cron-jobs.json
+    content: |
+      ${indent(6, cron_jobs_config)}
+%{ endif ~}
 
 runcmd:
   - systemctl enable docker
@@ -66,5 +71,11 @@ runcmd:
     if [ -n "$OPENCLAW_DATA" ] && [ ! -f "$OPENCLAW_DATA/openclaw.json" ]; then
       cp /opt/openclaw/openclaw.json "$OPENCLAW_DATA/openclaw.json"
       chown 1000:1000 "$OPENCLAW_DATA/openclaw.json"
+      # Inject cron jobs if configured
+      if [ -f /opt/openclaw/cron-jobs.json ]; then
+        mkdir -p "$OPENCLAW_DATA/cron"
+        cp /opt/openclaw/cron-jobs.json "$OPENCLAW_DATA/cron/jobs.json"
+        chown -R 1000:1000 "$OPENCLAW_DATA/cron"
+      fi
       cd /opt/openclaw && docker compose restart openclaw
     fi

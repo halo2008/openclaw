@@ -38,13 +38,19 @@ resource "hcloud_server" "main" {
       n8n_version       = var.n8n_version
       kokoro_version    = var.kokoro_version
       piper_version     = var.piper_version
+      gateway_token     = var.gateway_token
+      enable_fcm        = var.enable_fcm
     })
     openclaw_config = templatefile("${path.module}/templates/openclaw.json.tpl", {
       deepseek_api_key = var.deepseek_api_key
       google_api_key   = var.google_api_key
       default_model    = var.default_model
       domain           = var.domain
+      enable_cron      = var.enable_cron
     })
+    cron_jobs_config = length(var.cron_jobs) > 0 ? templatefile("${path.module}/templates/cron-jobs.json.tpl", {
+      cron_jobs = var.cron_jobs
+    }) : ""
     sshd_config    = templatefile("${path.module}/templates/sshd-hardening.conf.tpl", { ssh_port = var.ssh_port })
     fail2ban_config = templatefile("${path.module}/templates/fail2ban.conf.tpl", { ssh_port = var.ssh_port })
   })

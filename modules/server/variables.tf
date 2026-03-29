@@ -127,3 +127,33 @@ variable "domain" {
   type        = string
 }
 
+variable "enable_fcm" {
+  description = "Enable FCM push notification service"
+  type        = bool
+  default     = false
+}
+
+variable "gateway_token" {
+  description = "OpenClaw gateway auth token"
+  type        = string
+  sensitive   = true
+}
+
+variable "enable_cron" {
+  description = "Enable OpenClaw cron scheduler for automated tasks"
+  type        = bool
+  default     = true
+}
+
+variable "cron_jobs" {
+  description = "List of cron jobs to pre-configure (injected into cron/jobs.json)"
+  type = list(object({
+    id             = string
+    name           = string
+    schedule_expr  = string
+    schedule_tz    = optional(string, "Europe/Warsaw")
+    message        = string
+  }))
+  default = []
+}
+

@@ -26,3 +26,9 @@ output "tunnel_id" {
   description = "Cloudflare Tunnel ID"
   value       = module.cloudflare.tunnel_id
 }
+
+output "gateway_token" {
+  description = "OpenClaw gateway auth token (use in ClawAPK settings)"
+  value       = local.gateway_token
+  sensitive   = true
+}

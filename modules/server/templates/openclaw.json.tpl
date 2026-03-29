@@ -78,6 +78,10 @@
       }
     }
   },
+  "cron": {
+    "enabled": ${enable_cron},
+    "sessionRetention": "24h"
+  },
   "gateway": {
     "mode": "local",
     "controlUi": {

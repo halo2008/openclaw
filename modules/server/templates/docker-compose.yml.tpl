@@ -9,6 +9,7 @@ services:
     environment:
       - HOME=/home/node
       - OPENCLAW_GATEWAY_BIND=lan
+      - OPENCLAW_GATEWAY_TOKEN=${gateway_token}
     command: ["node", "dist/index.js", "gateway", "--bind", "lan", "--port", "18789", "--allow-unconfigured"]
     init: true
     healthcheck:
@@ -77,6 +78,24 @@ services:
       - PIPER_VOICE=pl_PL-darkman-medium
 %{ endif }
 
+%{ if enable_fcm }
+  fcm-push:
+    image: node:22-alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3100:3100"
+    volumes:
+      - fcm_data:/data
+      - ./services/fcm-push/index.js:/app/index.js:ro
+    command: ["node", "/app/index.js"]
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3100/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+%{ endif }
+
 volumes:
   openclaw_data:
   qdrant_data:
@@ -86,4 +105,7 @@ volumes:
 %{ endif }
 %{ if enable_piper }
   piper_data:
+%{ endif }
+%{ if enable_fcm }
+  fcm_data:
 %{ endif }

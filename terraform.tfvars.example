@@ -15,3 +15,22 @@ enable_kokoro         = true
 deepseek_api_key      = "sk-your-deepseek-api-key"
 google_api_key        = "your-google-gemini-api-key"
 default_model         = "google/gemini-3.1-flash-lite-preview"
+
+# FCM push notifications (optional)
+# enable_fcm          = true
+# firebase_sa_json    = "" # base64 encoded service account JSON
+
+# Gateway token (optional) - auto-generated if empty
+# gateway_token       = "your-custom-token"
+
+# Cron jobs (optional) - automated scheduled tasks
+enable_cron = true
+cron_jobs = [
+  {
+    id            = "oil-news-monitor"
+    name          = "Monitor Ropy Naftowej"
+    schedule_expr = "0 */4 * * *"
+    schedule_tz   = "Europe/Warsaw"
+    message       = "Przeszukaj najnowsze wiadomosci o cenach ropy naftowej, sytuacji na Bliskim Wschodzie (Iran, USA, ataki militarne), oraz o ewentualnych brakach paliwa. Podaj zwiezle podsumowanie po polsku: 1) Aktualne ceny ropy i trend cenowy 2) Kluczowe wydarzenia geopolityczne wplywajace na rynek ropy 3) Ryzyka dla dostaw paliwa i cen na stacjach."
+  }
+]
