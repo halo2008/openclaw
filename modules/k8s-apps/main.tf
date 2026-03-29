@@ -188,8 +188,8 @@ resource "kubernetes_deployment" "openclaw" {
               memory = "256Mi"
             }
             limits = {
-              cpu    = "1000m"
-              memory = "512Mi"
+              cpu    = "2000m"
+              memory = "4Gi"
             }
           }
 
@@ -288,6 +288,11 @@ resource "kubernetes_deployment" "n8n" {
           }
 
           env {
+            name  = "N8N_PORT"
+            value = "5678"
+          }
+
+          env {
             name  = "N8N_PROTOCOL"
             value = "https"
           }
@@ -315,11 +320,11 @@ resource "kubernetes_deployment" "n8n" {
           resources {
             requests = {
               cpu    = "100m"
-              memory = "128Mi"
+              memory = "256Mi"
             }
             limits = {
-              cpu    = "500m"
-              memory = "256Mi"
+              cpu    = "1000m"
+              memory = "3Gi"
             }
           }
 

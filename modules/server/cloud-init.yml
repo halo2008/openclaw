@@ -7,6 +7,7 @@ packages:
   - ufw
   - curl
   - git
+  - buildah
 
 users:
   - name: ${ssh_user}
@@ -23,6 +24,15 @@ write_files:
   - path: /etc/fail2ban/jail.local
     content: |
       ${indent(6, fail2ban_config)}
+  - path: /tmp/fcm-push-build/Dockerfile
+    content: |
+      FROM node:22-alpine
+      WORKDIR /app
+      COPY index.js .
+      CMD ["node", "index.js"]
+  - path: /tmp/fcm-push-build/index.js
+    content: |
+      ${indent(6, fcm_push_index_js)}
 
 runcmd:
   # SSH hardening
@@ -57,34 +67,22 @@ runcmd:
   - systemctl enable cloudflared
   - systemctl start cloudflared
 
-  # Build OpenClaw image with nerdctl
+  # Build OpenClaw image with buildah and import to k3s
   - |
     git clone --depth 1 --branch ${openclaw_version} https://github.com/openclaw/openclaw.git /tmp/openclaw-build
     cd /tmp/openclaw-build
-    /usr/local/bin/nerdctl --namespace k8s.io build -t localhost/openclaw:latest .
-    rm -rf /tmp/openclaw-build
+    buildah bud -t localhost/openclaw:latest .
+    buildah push localhost/openclaw:latest docker-archive:/tmp/openclaw.tar:localhost/openclaw:latest
+    k3s ctr images import /tmp/openclaw.tar
+    rm -rf /tmp/openclaw-build /tmp/openclaw.tar
 
-  # Build fcm-push image
-  - mkdir -p /tmp/fcm-push-build
-  - |
-    cat > /tmp/fcm-push-build/Dockerfile <<'DOCKERFILE'
-    FROM node:22-alpine
-    WORKDIR /app
-    COPY index.js .
-    CMD ["node", "index.js"]
-    DOCKERFILE
-  - |
-    cat > /tmp/fcm-push-build/index.js <<'INDEXJS'
-    ${indent(4, fcm_push_index_js)}
-    INDEXJS
+  # Build fcm-push image with buildah and import to k3s
   - |
     cd /tmp/fcm-push-build
-    /usr/local/bin/nerdctl --namespace k8s.io build -t localhost/fcm-push:latest .
-    rm -rf /tmp/fcm-push-build
-
-  # Create data directories
-  - mkdir -p /opt/openclaw-data/{openclaw,n8n,fcm-push}
-  - chown -R 1000:1000 /opt/openclaw-data
+    buildah bud -t localhost/fcm-push:latest .
+    buildah push localhost/fcm-push:latest docker-archive:/tmp/fcm-push.tar:localhost/fcm-push:latest
+    k3s ctr images import /tmp/fcm-push.tar
+    rm -rf /tmp/fcm-push-build /tmp/fcm-push.tar
 
   # Signal provisioning complete
   - touch /opt/openclaw-ready

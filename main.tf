@@ -147,6 +147,7 @@ module "k8s_network" {
 # --- Monitoring (Prometheus agent + Alloy → Grafana Cloud) ---
 
 module "k8s_monitoring" {
+  count  = var.grafana_cloud_prometheus_url != "" ? 1 : 0
   source = "./modules/k8s-monitoring"
 
   grafana_cloud_prometheus_url = var.grafana_cloud_prometheus_url

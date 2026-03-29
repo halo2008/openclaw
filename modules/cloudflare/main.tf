@@ -69,17 +69,8 @@ resource "cloudflare_zero_trust_access_application" "claw" {
   auto_redirect_to_identity = true
 }
 
-resource "cloudflare_zero_trust_access_policy" "claw" {
-  account_id     = var.account_id
-  application_id = cloudflare_zero_trust_access_application.claw.id
-  name           = "Allow owner emails"
-  decision       = "allow"
-  precedence     = 1
-
-  include {
-    email = var.access_allowed_emails
-  }
-}
+# Access Policy managed manually in Cloudflare dashboard
+# (ClawToken doesn't have Access Policy permissions)
 
 resource "cloudflare_record" "extra" {
   for_each = var.extra_hostnames

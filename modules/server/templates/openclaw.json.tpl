@@ -130,12 +130,7 @@
   },
   "messages": {
     "tts": {
-      "auto": "off",
-      "provider": "edge",
-      "edge": {
-        "voice": "pl-PL-ZofiaNeural",
-        "lang": "pl-PL"
-      }
+      "auto": "off"
     }
   },
   "commands": {

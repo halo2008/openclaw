@@ -35,6 +35,10 @@ resource "hcloud_server" "main" {
     fail2ban_config    = templatefile("${path.module}/templates/fail2ban.conf.tpl", { ssh_port = var.ssh_port })
   })
 
+  lifecycle {
+    ignore_changes = [user_data]
+  }
+
   depends_on = [var.subnet_id]
 }
 
