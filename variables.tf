@@ -1,3 +1,5 @@
+# --- Infrastructure ---
+
 variable "hcloud_token" {
   description = "Hetzner Cloud API token"
   type        = string
@@ -20,6 +22,20 @@ variable "cloudflare_zone_id" {
   type        = string
 }
 
+variable "gcp_project_id" {
+  description = "GCP project ID for Secret Manager and KMS"
+  type        = string
+  default     = "pacific-attic-191816"
+}
+
+variable "gcp_region" {
+  description = "GCP region for KMS and resources"
+  type        = string
+  default     = "europe-west3"
+}
+
+# --- Domain & access ---
+
 variable "domain" {
   description = "Domain for the main service"
   type        = string
@@ -27,11 +43,10 @@ variable "domain" {
 }
 
 variable "extra_hostnames" {
-  description = "Additional services exposed via Cloudflare Tunnel (key = subdomain)"
+  description = "Additional services exposed via Cloudflare Tunnel (key = subdomain, value = NodePort)"
   type        = map(number)
   default = {
-    n8n    = 5678
-    qdrant = 6333
+    n8n = 30678
   }
 }
 
@@ -41,11 +56,7 @@ variable "access_allowed_emails" {
   default     = ["your-email@example.com"]
 }
 
-variable "enable_kokoro" {
-  description = "Enable Kokoro TTS service (English)"
-  type        = bool
-  default     = true
-}
+# --- Server ---
 
 variable "environment" {
   description = "Environment name"
@@ -71,6 +82,12 @@ variable "ssh_public_key_path" {
   default     = "~/.ssh/id_ed25519.pub"
 }
 
+variable "ssh_private_key_path" {
+  description = "Path to SSH private key (for provisioners)"
+  type        = string
+  default     = "~/.ssh/id_ed25519"
+}
+
 variable "ssh_port" {
   description = "Custom SSH port"
   type        = number
@@ -89,48 +106,26 @@ variable "allowed_ssh_ips" {
   default     = ["0.0.0.0/0", "::/0"]
 }
 
+# --- Networking ---
+
+variable "vpc_ip_range" {
+  description = "IP range for VPC network"
+  type        = string
+  default     = "10.0.0.0/16"
+}
+
+variable "subnet_ip_range" {
+  description = "IP range for subnet"
+  type        = string
+  default     = "10.0.1.0/24"
+}
+
+# --- Application ---
+
 variable "openclaw_version" {
   description = "Git ref (tag/branch/commit) for OpenClaw build"
   type        = string
   default     = "main"
-}
-
-variable "qdrant_version" {
-  description = "Qdrant Docker image tag"
-  type        = string
-  default     = "v1.13.6"
-}
-
-variable "n8n_version" {
-  description = "n8n Docker image tag"
-  type        = string
-  default     = "1.88.0"
-}
-
-variable "kokoro_version" {
-  description = "Kokoro FastAPI Docker image tag"
-  type        = string
-  default     = "v0.4.3"
-}
-
-variable "piper_version" {
-  description = "Piper Docker image tag"
-  type        = string
-  default     = "latest"
-}
-
-variable "deepseek_api_key" {
-  description = "DeepSeek API key"
-  type        = string
-  sensitive   = true
-  default     = ""
-}
-
-variable "google_api_key" {
-  description = "Google Gemini API key"
-  type        = string
-  sensitive   = true
-  default     = ""
 }
 
 variable "default_model" {
@@ -139,14 +134,75 @@ variable "default_model" {
   default     = "google/gemini-3.1-flash-lite-preview"
 }
 
+variable "enable_cron" {
+  description = "Enable OpenClaw cron scheduler for automated tasks"
+  type        = bool
+  default     = true
+}
+
+variable "cron_jobs" {
+  description = "Pre-configured cron jobs (injected on first deploy)"
+  type = list(object({
+    id            = string
+    name          = string
+    schedule_expr = string
+    schedule_tz   = optional(string, "Europe/Warsaw")
+    message       = string
+  }))
+  default = []
+}
+
 variable "enable_fcm" {
   description = "Enable FCM push notification service"
   type        = bool
   default     = false
 }
 
-variable "firebase_sa_json" {
-  description = "Firebase service account JSON (base64 encoded)"
+variable "n8n_version" {
+  description = "n8n Docker image tag"
+  type        = string
+  default     = "latest"
+}
+
+# --- Secret seeds (initial population of GCP Secret Manager) ---
+
+variable "deepseek_api_key" {
+  description = "DeepSeek API key (seed for GCP SM)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "google_api_key" {
+  description = "Google Gemini API key (seed for GCP SM)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "google_api_key_2" {
+  description = "Google Gemini API key backup (seed for GCP SM)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "groq_api_key" {
+  description = "Groq API key (seed for GCP SM)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "sambanova_api_key" {
+  description = "SambaNova API key (seed for GCP SM)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "cerebras_api_key" {
+  description = "Cerebras API key (seed for GCP SM)"
   type        = string
   sensitive   = true
   default     = ""
@@ -159,32 +215,42 @@ variable "gateway_token" {
   default     = ""
 }
 
-variable "enable_cron" {
-  description = "Enable OpenClaw cron scheduler for automated tasks"
-  type        = bool
-  default     = true
-}
-
-variable "cron_jobs" {
-  description = "Pre-configured cron jobs (injected on first deploy)"
-  type = list(object({
-    id             = string
-    name           = string
-    schedule_expr  = string
-    schedule_tz    = optional(string, "Europe/Warsaw")
-    message        = string
-  }))
-  default = []
-}
-
-variable "vpc_ip_range" {
-  description = "IP range for VPC network"
+variable "n8n_encryption_key" {
+  description = "n8n encryption key for credentials DB"
   type        = string
-  default     = "10.0.0.0/16"
+  sensitive   = true
 }
 
-variable "subnet_ip_range" {
-  description = "IP range for subnet"
+variable "firebase_sa_json" {
+  description = "Firebase service account JSON (raw)"
   type        = string
-  default     = "10.0.1.0/24"
+  sensitive   = true
+  default     = ""
+}
+
+# --- Monitoring (Grafana Cloud) ---
+
+variable "grafana_cloud_prometheus_url" {
+  description = "Grafana Cloud Prometheus remote write URL"
+  type        = string
+  default     = ""
+}
+
+variable "grafana_cloud_loki_url" {
+  description = "Grafana Cloud Loki push URL"
+  type        = string
+  default     = ""
+}
+
+variable "grafana_cloud_user" {
+  description = "Grafana Cloud user/instance ID"
+  type        = string
+  default     = ""
+}
+
+variable "grafana_cloud_api_key" {
+  description = "Grafana Cloud API key for remote write"
+  type        = string
+  sensitive   = true
+  default     = ""
 }

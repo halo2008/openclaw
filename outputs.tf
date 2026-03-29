@@ -32,3 +32,8 @@ output "gateway_token" {
   value       = local.gateway_token
   sensitive   = true
 }
+
+output "eso_sa_email" {
+  description = "External Secrets Operator GCP service account"
+  value       = module.gcp_secrets.eso_sa_email
+}

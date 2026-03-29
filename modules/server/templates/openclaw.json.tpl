@@ -1,14 +1,30 @@
 {
   "agents": {
     "defaults": {
-      "model": "${default_model}"
+      "model": {
+        "primary": "${default_model}",
+        "fallbacks": [
+          "google2/gemini-3.1-flash-lite-preview",
+          "sambanova/Meta-Llama-3.3-70B-Instruct",
+          "groq/llama-3.3-70b-versatile",
+          "cerebras/qwen-3-235b-a22b-instruct-2507",
+          "groq/llama-3.1-8b-instant",
+          "sambanova/DeepSeek-R1",
+          "cerebras/llama3.1-8b",
+          "deepseek/deepseek-chat"
+        ]
+      },
+      "memorySearch": {
+        "enabled": true,
+        "provider": "gemini"
+      }
     }
   },
   "models": {
     "providers": {
       "deepseek": {
         "baseUrl": "https://api.deepseek.com/v1",
-        "apiKey": "${deepseek_api_key}",
+        "apiKey": "__DEEPSEEK_API_KEY__",
         "api": "openai-completions",
         "models": [
           {
@@ -28,14 +44,85 @@
       },
       "google": {
         "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
-        "apiKey": "${google_api_key}",
+        "apiKey": "__GOOGLE_API_KEY__",
         "api": "google-generative-ai",
         "models": [
           {
-            "id": "gemini-2.0-flash-exp",
-            "name": "Gemini 2.0 Flash Experimental",
+            "id": "gemini-3.1-flash-lite-preview",
+            "name": "Gemini 3.1 Flash Lite",
             "input": ["text"],
             "contextWindow": 1048576
+          }
+        ]
+      },
+      "google2": {
+        "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
+        "apiKey": "__GOOGLE_API_KEY_2__",
+        "api": "google-generative-ai",
+        "models": [
+          {
+            "id": "gemini-3.1-flash-lite-preview",
+            "name": "Gemini 3.1 Flash Lite (backup)",
+            "input": ["text"],
+            "contextWindow": 1048576
+          }
+        ]
+      },
+      "groq": {
+        "baseUrl": "https://api.groq.com/openai/v1",
+        "apiKey": "__GROQ_API_KEY__",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "llama-3.3-70b-versatile",
+            "name": "Llama 3.3 70B (Groq)",
+            "input": ["text"],
+            "contextWindow": 131072
+          },
+          {
+            "id": "llama-3.1-8b-instant",
+            "name": "Llama 3.1 8B Instant (Groq)",
+            "input": ["text"],
+            "contextWindow": 131072
+          }
+        ]
+      },
+      "sambanova": {
+        "baseUrl": "https://api.sambanova.ai/v1",
+        "apiKey": "__SAMBANOVA_API_KEY__",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "Meta-Llama-3.3-70B-Instruct",
+            "name": "Llama 3.3 70B (SambaNova)",
+            "input": ["text"],
+            "contextWindow": 131072
+          },
+          {
+            "id": "DeepSeek-R1",
+            "name": "DeepSeek R1 (SambaNova)",
+            "reasoning": true,
+            "input": ["text"],
+            "contextWindow": 131072
+          }
+        ]
+      },
+      "cerebras": {
+        "baseUrl": "https://api.cerebras.ai/v1",
+        "apiKey": "__CEREBRAS_API_KEY__",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "qwen-3-235b-a22b-instruct-2507",
+            "name": "Qwen 3 235B (Cerebras)",
+            "input": ["text"],
+            "contextWindow": 131072
+          },
+          {
+            "id": "llama3.1-8b",
+            "name": "Llama 3.1 8B (Cerebras)",
+            "input": ["text"],
+            "contextWindow": 131072
           }
         ]
       }
@@ -43,14 +130,8 @@
   },
   "messages": {
     "tts": {
-      "auto": "always",
-      "provider": "openai",
-      "openai": {
-        "baseUrl": "http://kokoro:8880/v1",
-        "apiKey": "not-needed",
-        "model": "kokoro",
-        "voice": "af_heart"
-      },
+      "auto": "off",
+      "provider": "edge",
       "edge": {
         "voice": "pl-PL-ZofiaNeural",
         "lang": "pl-PL"
@@ -66,13 +147,6 @@
   "talk": {
     "provider": "microsoft",
     "providers": {
-      "openai": {
-        "voiceId": "af_heart",
-        "outputFormat": "mp3",
-        "baseUrl": "http://kokoro:8880/v1",
-        "apiKey": "not-needed",
-        "modelId": "kokoro"
-      },
       "microsoft": {
         "voiceId": "pl-PL-ZofiaNeural"
       }

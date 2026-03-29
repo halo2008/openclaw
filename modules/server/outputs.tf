@@ -17,3 +17,8 @@ output "server_name" {
 output "server_id" {
   value = hcloud_server.main.id
 }
+
+output "kubeconfig_ready" {
+  description = "Signals that kubeconfig has been fetched"
+  value       = null_resource.fetch_kubeconfig.id
+}

@@ -2,6 +2,7 @@
 
 [![n8n](https://img.shields.io/badge/n8n-Automation-FF6D5B?style=for-the-badge&logo=n8n)](https://n8n.io/)
 [![Qdrant](https://img.shields.io/badge/Qdrant-Knowledge-00D2FF?style=for-the-badge&logo=qdrant)](https://qdrant.tech/)
+[![Firebase](https://img.shields.io/badge/Firebase-Notifications-FFCA28?style=for-the-badge&logo=firebase)](https://firebase.google.com/)
 
 ## Co potrzebujesz przed startem
 
@@ -79,6 +80,30 @@ ssh_public_key_path   = "~/.ssh/id_ed25519.pub"
 ssh_port              = 2222
 ssh_user              = "deploy"
 allowed_ssh_ips       = ["TWOJE.IP/32"]
+
+# --- Aplikacja ---
+default_model    = "google/gemini-3.1-flash-lite-preview"
+enable_fcm       = true
+firebase_sa_json = "{\"type\":\"service_account\",...}"  # Surowy JSON jako string
+enable_cron      = true
+
+# --- Klucze API (opcjonalnie) ---
+google_api_key    = "..."
+deepseek_api_key  = "..."
+groq_api_key      = "..."
+sambanova_api_key = "..."
+cerebras_api_key  = "..."
+
+# --- Grafana Cloud Monitoring ---
+grafana_cloud_prometheus_url = "https://prometheus-prod-..."
+grafana_cloud_loki_url       = "https://logs-prod-..."
+grafana_cloud_user           = "123456"
+grafana_cloud_api_key        = "glc_..."
+
+# --- Inne serwisy (np. n8n) ---
+extra_hostnames = {
+  n8n = 30678
+}
 ```
 
 Żeby sprawdzić swoje publiczne IP:
@@ -130,29 +155,27 @@ curl https://claw.your-domain.com
 |-------|-----------------|
 | Hetzner CX33 (4 vCPU, 8 GB RAM) | ~€10.35 |
 | Cloudflare Tunnel | darmowy |
+| Grafana Cloud (Monitoring) | darmowy (Free Tier) |
 | GCS bucket (state) | ~$0 |
 | **Razem** | **~€10.35/mies** |
+
+- **n8n**: Dedykowane automatyzacje, wystawiane przez `extra_hostnames`.
+- **Qdrant**: Wydajna baza wiedzy (vector database).
+- **FCM Push**: Wbudowana usługa powiadomień dla aplikacji mobilnej.
+- **Cron Scheduler**: Automatyczne zadania o określonych porach.
+- **Monitoring**: Pełna analityka (metryki i logi) w Grafana Cloud.
 
 ## Jak to działa
 
 ```
-Użytkownik → claw.your-domain.com → Cloudflare CDN → Tunel → cloudflared → OpenClaw Bot → [Tools / Knowledge / n8n]
+Użytkownik → claw.your-domain.com → Cloudflare CDN → Tunel → cloudflared → OpenClaw Bot → [Tools / Knowledge / n8n / FCM]
+                                                                              ↓
+                                                                        [Cron Jobs]
 ```
 
-- Serwer nie ma otwartych portów 80/443 — cały ruch HTTP idzie przez tunel
-- SSH na porcie 2222 — omija automaty skanujące port 22
-- Root login wyłączony — tylko user `deploy` z kluczem SSH
-- Hasła wyłączone — tylko klucz publiczny
-- fail2ban banuje IP po 3 nieudanych próbach na 1h
-- State Terraforma bezpiecznie w GCS z wersjonowaniem
----
-
-## 🔌 Ekosystem i Integracje
-
-Rozszerz możliwości OpenClaw o dodatkowe komponenty:
-
-- **n8n**: Dostępne są dedykowane paczki n8n do automatyzacji OpenClaw.
-- **Qdrant**: Może zostać wykorzystany jako wydajna baza wiedzy (vector database).
+- **K3s Cluster**: Cała aplikacja działa jako kontenery w lekkim Kubernetesie (K3s).
+- **Bezpieczeństwo**: Serwer nie ma otwartych portów 80/443 — ruch idzie przez tunel.
+- **Monitoring**: Metryki i logi są przesyłane do Grafana Cloud przez agenta Alloy.
 
 ---
 

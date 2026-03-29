@@ -21,6 +21,7 @@
   [![Cloudflare](https://img.shields.io/badge/Cloudflare-Tunnel-F38020?style=for-the-badge&logo=cloudflare)](https://www.cloudflare.com/)
   [![n8n](https://img.shields.io/badge/n8n-Automation-FF6D5B?style=for-the-badge&logo=n8n)](https://n8n.io/)
   [![Qdrant](https://img.shields.io/badge/Qdrant-Knowledge-00D2FF?style=for-the-badge&logo=qdrant)](https://qdrant.tech/)
+  [![Firebase](https://img.shields.io/badge/Firebase-Notifications-FFCA28?style=for-the-badge&logo=firebase)](https://firebase.google.com/)
   [![ClawBot](https://img.shields.io/badge/ClawBot-Framework-FF4F4F?style=for-the-badge)](https://github.com/halo2008/openclaw)
 </p>
 
@@ -35,26 +36,37 @@ graph TD
     User((User)) -->|HTTPS| CF[Cloudflare CDN]
     CF -->|Encrypted Tunnel| CT[cloudflared]
     
-    subgraph "Hetzner Cloud (Ubuntu 24.04)"
+    subgraph "Hetzner Cloud (K3s Cluster)"
         direction TB
-        CT -->|localhost:8080| App[OpenClaw Bot]
+        CT -->|Local Ingress| K8S[K3s / Traefik]
+        
+        K8S --> App[OpenClaw Bot]
+        K8S --> n8n[n8n Automation]
         
         App -.- Tools[Agent Tools & Knowledge]
+        App --> Cron[Cron Scheduler]
         
         Tools --> KB[(Qdrant DB)]
-        Tools --> n8n[n8n Workflows]
         Tools --> Search[Web Search]
-        Tools --> DB[(Local Data)]
+        Tools --> FCM[FCM Push Service]
         
-        Security[Firewall / UFW / fail2ban]
+        subgraph "Monitoring Layer"
+            Alloy[Grafana Alloy] --> Prometheus[Prometheus Agent]
+            Alloy --> Loki[Loki Push]
+        end
+        
+        K8S -.-> Alloy
     end
+    
+    Prometheus --> GC[Grafana Cloud]
+    Loki --> GC
     
     Terraform[Terraform CLI] -->|Remote State| GCS[(GCP Bucket)]
     Terraform -->|Manage| Hetzner
 ```
 
 > [!NOTE]
-> All incoming web traffic is routed through **Cloudflare Tunnel**. The server has NO public HTTP/S ports open to the internet.
+> All incoming web traffic is routed through **Cloudflare Tunnel** and managed by **K3s / Traefik ingress**. The server has NO public HTTP/S ports open to the internet.
 
 ---
 
@@ -63,9 +75,11 @@ graph TD
 | Component | Description |
 |-----------|-------------|
 | **Compute** | Hetzner CX33 (4 vCPU, 8 GB RAM) |
+| **Orchestration** | **K3s (Lightweight Kubernetes)** |
 | **Networking** | Private VPC (`10.0.0.0/16`) with internal subnets |
 | **Security** | SSH on port 2222, Fail2Ban, root access disabled |
 | **Connectivity** | Cloudflare Tunnel (no public ingress) |
+| **Monitoring** | **Grafana Cloud (Prometheus + Loki via Alloy)** |
 | **State** | GCS bucket with versioning for Terraform state |
 
 ---
@@ -150,8 +164,12 @@ Designed with a **Zero Trust** mindset:
 
 Enhance your OpenClaw setup with these optional components:
 
-- **n8n**: Dedicated nodes are available for automating OpenClaw workflows.
-- **Qdrant**: Can be integrated as a high-performance vector database for your knowledge base.
+- **n8n**: Dedicated nodes are available for automating OpenClaw workflows. Expose it via `extra_hostnames` for secure access.
+- **Qdrant**: High-performance vector database for your knowledge base.
+- **FCM Push**: Built-in service for sending real-time notifications to the ClawAPK mobile app.
+- **Cron Scheduler**: Automated task execution based on custom schedules.
+- **Monitoring**: Full observability with Grafana Cloud, tracking metrics and logs in real-time.
+- **LLM Providers**: Support for Google Gemini, DeepSeek, Groq, SambaNova, and Cerebras.
 
 ---
 

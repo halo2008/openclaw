@@ -1,36 +1,61 @@
-hcloud_token          = "your-hetzner-api-token"
-cloudflare_api_token  = "your-cloudflare-api-token"
+# --- Infrastructure ---
+hcloud_token         = "your-hetzner-api-token"
+cloudflare_api_token = "your-cloudflare-api-token"
 cloudflare_account_id = "your-cloudflare-account-id"
 cloudflare_zone_id    = "your-cloudflare-zone-id"
-gcp_project_id        = "your-project-id"
-domain                = "claw.your-domain.com"
-environment           = "prod"
-location              = "nbg1"
-server_type           = "cx33"
-ssh_public_key_path   = "~/.ssh/id_ed25519.pub"
-ssh_port              = 2222
-ssh_user              = "deploy"
-allowed_ssh_ips       = ["YOUR.IP.HERE/32"]
-enable_kokoro         = true
-deepseek_api_key      = "sk-your-deepseek-api-key"
-google_api_key        = "your-google-gemini-api-key"
-default_model         = "google/gemini-3.1-flash-lite-preview"
 
-# FCM push notifications (optional)
-# enable_fcm          = true
-# firebase_sa_json    = "" # base64 encoded service account JSON
+# --- Domain ---
+domain = "claw.your-domain.com"
+extra_hostnames = {
+  n8n = 30678
+}
+access_allowed_emails = ["your-email@example.com"]
 
-# Gateway token (optional) - auto-generated if empty
-# gateway_token       = "your-custom-token"
+# --- Server ---
+environment         = "prod"
+location            = "nbg1"
+server_type         = "cx33"
+ssh_public_key_path = "~/.ssh/id_ed25519.pub"
+ssh_port            = 2222
+ssh_user            = "deploy"
+allowed_ssh_ips     = ["YOUR.IP.HERE/32"]
 
-# Cron jobs (optional) - automated scheduled tasks
-enable_cron = true
+# --- GCP ---
+gcp_project_id = "your-gcp-project-id"
+gcp_region     = "europe-west3"
+
+# --- Application ---
+openclaw_version = "main"
+default_model    = "google/gemini-3.1-flash-lite-preview"
+enable_cron      = true
+enable_fcm       = false
+n8n_version      = "latest"
+
+# --- Secret seeds (initial values for GCP Secret Manager) ---
+# After first apply, manage secrets in GCP SM console directly
+deepseek_api_key   = ""
+google_api_key     = ""
+google_api_key_2   = ""
+groq_api_key       = ""
+sambanova_api_key  = ""
+cerebras_api_key   = ""
+gateway_token      = ""
+n8n_encryption_key = ""
+firebase_sa_json   = ""
+
+# --- Cron jobs ---
 cron_jobs = [
-  {
-    id            = "oil-news-monitor"
-    name          = "Monitor Ropy Naftowej"
-    schedule_expr = "0 */4 * * *"
-    schedule_tz   = "Europe/Warsaw"
-    message       = "Przeszukaj najnowsze wiadomosci o cenach ropy naftowej, sytuacji na Bliskim Wschodzie (Iran, USA, ataki militarne), oraz o ewentualnych brakach paliwa. Podaj zwiezle podsumowanie po polsku: 1) Aktualne ceny ropy i trend cenowy 2) Kluczowe wydarzenia geopolityczne wplywajace na rynek ropy 3) Ryzyka dla dostaw paliwa i cen na stacjach."
-  }
+  # {
+  #   id            = "world-news-briefing"
+  #   name          = "Briefing Wiadomosci ze Swiata"
+  #   schedule_expr = "0 */4 * * *"
+  #   schedule_tz   = "Europe/Warsaw"
+  #   message       = "Your cron prompt here..."
+  # }
 ]
+
+# --- Monitoring (Grafana Cloud) ---
+grafana_cloud_prometheus_url = ""
+grafana_cloud_loki_url       = ""
+grafana_cloud_user           = ""
+grafana_cloud_api_key        = ""

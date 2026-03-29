@@ -1,10 +1,7 @@
 terraform {
   required_version = ">= 1.5"
 
-  backend "gcs" {
-    bucket = "festive-dolphin-483819-i1-tfstate"
-    prefix = "openclaw/state"
-  }
+  backend "gcs" {}
 
   required_providers {
     hcloud = {
@@ -19,6 +16,22 @@ terraform {
       source  = "hashicorp/random"
       version = "~> 3.6"
     }
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 7.0"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.17"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.38"
+    }
+    kubectl = {
+      source  = "gavinbunney/kubectl"
+      version = "~> 1.19"
+    }
   }
 }
 
@@ -28,4 +41,24 @@ provider "hcloud" {
 
 provider "cloudflare" {
   api_token = var.cloudflare_api_token
+}
+
+provider "google" {
+  project = var.gcp_project_id
+  region  = var.gcp_region
+}
+
+provider "kubernetes" {
+  config_path = pathexpand("~/.kube/config-openclaw")
+}
+
+provider "helm" {
+  kubernetes {
+    config_path = pathexpand("~/.kube/config-openclaw")
+  }
+}
+
+provider "kubectl" {
+  config_path    = pathexpand("~/.kube/config-openclaw")
+  load_config_file = true
 }

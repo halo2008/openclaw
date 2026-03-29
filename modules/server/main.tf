@@ -25,35 +25,48 @@ resource "hcloud_server" "main" {
   }
 
   user_data = templatefile("${path.module}/cloud-init.yml", {
-    tunnel_token   = var.tunnel_token
-    ssh_port       = var.ssh_port
-    ssh_user       = var.ssh_user
-    ssh_pub_key    = var.ssh_pub_key
-    docker_compose = templatefile("${path.module}/templates/docker-compose.yml.tpl", {
-      n8n_host          = var.n8n_host
-      enable_kokoro     = var.enable_kokoro
-      enable_piper      = var.enable_piper
-      openclaw_version  = var.openclaw_version
-      qdrant_version    = var.qdrant_version
-      n8n_version       = var.n8n_version
-      kokoro_version    = var.kokoro_version
-      piper_version     = var.piper_version
-      gateway_token     = var.gateway_token
-      enable_fcm        = var.enable_fcm
-    })
-    openclaw_config = templatefile("${path.module}/templates/openclaw.json.tpl", {
-      deepseek_api_key = var.deepseek_api_key
-      google_api_key   = var.google_api_key
-      default_model    = var.default_model
-      domain           = var.domain
-      enable_cron      = var.enable_cron
-    })
-    cron_jobs_config = length(var.cron_jobs) > 0 ? templatefile("${path.module}/templates/cron-jobs.json.tpl", {
-      cron_jobs = var.cron_jobs
-    }) : ""
-    sshd_config    = templatefile("${path.module}/templates/sshd-hardening.conf.tpl", { ssh_port = var.ssh_port })
-    fail2ban_config = templatefile("${path.module}/templates/fail2ban.conf.tpl", { ssh_port = var.ssh_port })
+    tunnel_token       = var.tunnel_token
+    ssh_port           = var.ssh_port
+    ssh_user           = var.ssh_user
+    ssh_pub_key        = var.ssh_pub_key
+    openclaw_version   = var.openclaw_version
+    fcm_push_index_js  = file("${path.module}/../../services/fcm-push/index.js")
+    sshd_config        = templatefile("${path.module}/templates/sshd-hardening.conf.tpl", { ssh_port = var.ssh_port })
+    fail2ban_config    = templatefile("${path.module}/templates/fail2ban.conf.tpl", { ssh_port = var.ssh_port })
   })
 
   depends_on = [var.subnet_id]
+}
+
+# --- Fetch kubeconfig after provisioning ---
+
+resource "null_resource" "fetch_kubeconfig" {
+  triggers = {
+    server_id = hcloud_server.main.id
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "while [ ! -f /opt/openclaw-ready ]; do sleep 5; done",
+      "cat /etc/rancher/k3s/k3s.yaml"
+    ]
+
+    connection {
+      type        = "ssh"
+      host        = hcloud_server.main.ipv4_address
+      user        = var.ssh_user
+      private_key = file(var.ssh_private_key_path)
+      port        = var.ssh_port
+      timeout     = "10m"
+    }
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      scp -o StrictHostKeyChecking=no -i ${var.ssh_private_key_path} -P ${var.ssh_port} \
+        ${var.ssh_user}@${hcloud_server.main.ipv4_address}:/etc/rancher/k3s/k3s.yaml \
+        ~/.kube/config-openclaw
+      sed -i 's/127.0.0.1/${hcloud_server.main.ipv4_address}/g' ~/.kube/config-openclaw
+    EOT
+  }
 }

@@ -1,0 +1,2 @@
+bucket = "your-gcs-bucket-name"
+prefix = "openclaw-k3s/state"
