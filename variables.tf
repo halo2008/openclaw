@@ -140,14 +140,21 @@ variable "enable_cron" {
   default     = true
 }
 
+variable "user_profile" {
+  description = "USER.md content - agent's knowledge about the user for job matching etc."
+  type        = string
+  default     = ""
+}
+
 variable "cron_jobs" {
-  description = "Pre-configured cron jobs (injected on first deploy)"
+  description = "Pre-configured cron jobs (isolated mode with webhook delivery)"
   type = list(object({
     id            = string
     name          = string
     schedule_expr = string
     schedule_tz   = optional(string, "Europe/Warsaw")
     message       = string
+    webhook_url   = string
   }))
   default = []
 }

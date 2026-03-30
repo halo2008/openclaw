@@ -11,11 +11,15 @@
         "expr": "${job.schedule_expr}",
         "tz": "${job.schedule_tz}"
       },
-      "sessionTarget": "main",
-      "wakeMode": "now",
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
       "payload": {
-        "kind": "systemEvent",
-        "text": "${replace(job.message, "\"", "\\\"")}"
+        "kind": "agentTurn",
+        "message": "${replace(replace(job.message, "\"", "\\\""), "\n", "\\n")}",
+        "lightContext": true
+      },
+      "delivery": {
+        "mode": "none"
       },
       "deleteAfterRun": false
     }%{ if i < length(cron_jobs) - 1 },%{ endif }

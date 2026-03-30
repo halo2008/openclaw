@@ -75,6 +75,16 @@ resource "kubernetes_config_map" "openclaw_config" {
   }
 }
 
+resource "kubernetes_config_map" "openclaw_workspace" {
+  metadata {
+    name      = "openclaw-workspace"
+    namespace = kubernetes_namespace.openclaw.metadata[0].name
+  }
+  data = {
+    "USER.md" = var.user_profile
+  }
+}
+
 resource "kubernetes_config_map" "cron_jobs" {
   count = length(var.cron_jobs) > 0 ? 1 : 0
 

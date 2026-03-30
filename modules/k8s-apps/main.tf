@@ -119,6 +119,12 @@ resource "kubernetes_deployment" "openclaw" {
             if [ -f /config-template/jobs.json ]; then
               mkdir -p /rendered-config/cron
               cp /config-template/jobs.json /rendered-config/cron/jobs.json
+              mkdir -p /data/cron
+              cp /config-template/jobs.json /data/cron/jobs.json
+            fi
+            mkdir -p /data/workspace
+            if [ -f /workspace-template/USER.md ]; then
+              cp /workspace-template/USER.md /data/workspace/USER.md
             fi
           EOT
           ]
@@ -137,6 +143,16 @@ resource "kubernetes_deployment" "openclaw" {
           volume_mount {
             name       = "rendered-config"
             mount_path = "/rendered-config"
+          }
+
+          volume_mount {
+            name       = "openclaw-data"
+            mount_path = "/data"
+          }
+
+          volume_mount {
+            name       = "workspace-template"
+            mount_path = "/workspace-template"
           }
         }
 
@@ -241,6 +257,13 @@ resource "kubernetes_deployment" "openclaw" {
         volume {
           name = "rendered-config"
           empty_dir {}
+        }
+
+        volume {
+          name = "workspace-template"
+          config_map {
+            name = "openclaw-workspace"
+          }
         }
       }
     }

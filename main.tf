@@ -101,6 +101,7 @@ module "k8s_base" {
   default_model = var.default_model
   enable_cron   = var.enable_cron
   cron_jobs     = var.cron_jobs
+  user_profile  = var.user_profile
 
   depends_on = [module.server]
 }

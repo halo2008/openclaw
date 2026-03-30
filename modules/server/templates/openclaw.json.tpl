@@ -159,13 +159,7 @@
       ]
     },
     "auth": {
-      "mode": "trusted-proxy",
-      "trustedProxy": {
-        "userHeader": "cf-connecting-ip",
-        "requiredHeaders": [
-          "cf-connecting-ip"
-        ]
-      }
+      "mode": "token"
     },
     "trustedProxies": [
       "172.16.0.0/12",
