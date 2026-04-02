@@ -25,7 +25,7 @@ gcp_project_id = "your-gcp-project-id"
 gcp_region     = "europe-west3"
 
 # --- Application ---
-openclaw_version = "main"
+openclaw_version = "v2026.4.1"
 default_model    = "google/gemini-3.1-flash-lite-preview"
 enable_cron      = true
 enable_fcm       = false

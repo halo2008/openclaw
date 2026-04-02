@@ -21,7 +21,8 @@
       "delivery": {
         "mode": "none"
       },
-      "deleteAfterRun": false
+      "deleteAfterRun": false,
+      "state": {}
     }%{ if i < length(cron_jobs) - 1 },%{ endif }
 %{ endfor ~}
   ]
